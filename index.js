@@ -1,40 +1,19 @@
-const express = require("express");
-const cors = require("cors");
-const bodyParser = require("body-parser");
-const axios = require("axios");
-
-require("dotenv").config();
+// index.js
+const express = require('express');
+const path = require('path');
+require('dotenv').config();
 
 const app = express();
-app.use(cors());
-app.use(bodyParser.json());
+const port = process.env.PORT || 3000;
 
-app.post("/generate", async (req, res) => {
-  const prompt = req.body.prompt;
-  const replicateApiKey = process.env.REPLICATE_API_KEY;
+// Serve static files like index.html, CSS, JS, images
+app.use(express.static(path.join(__dirname)));
 
-  try {
-    const response = await axios.post(
-      "https://api.replicate.com/v1/predictions",
-      {
-        version: "a9758cb3...replace_with_correct_version_id...",
-        input: { prompt: prompt }
-      },
-      {
-        headers: {
-          Authorization: `Token ${replicateApiKey}`,
-          "Content-Type": "application/json"
-        }
-      }
-    );
-
-    res.json(response.data);
-  } catch (error) {
-    console.error("Error generating image:", error.response?.data || error.message);
-    res.status(500).json({ error: "Image generation failed" });
-  }
+// Home route - serve index.html
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-app.listen(3000, () => {
-  console.log("Server running on port 3000");
+app.listen(port, () => {
+  console.log(`Server running at http://localhost:${port}`);
 });
