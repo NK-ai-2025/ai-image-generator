@@ -7,98 +7,109 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #0f172a;
-      color: #f1f5f9;
-      margin: 0;
-      padding: 0;
+      background-color: #121212;
+      color: #fff;
       display: flex;
       flex-direction: column;
       align-items: center;
+      padding: 2rem;
     }
 
-    header {
-      background-color: #1e293b;
-      width: 100%;
-      padding: 20px 0;
-      text-align: center;
-      font-size: 24px;
-      font-weight: bold;
+    h1 {
+      margin-bottom: 1rem;
     }
 
-    main {
-      margin-top: 50px;
-      width: 90%;
-      max-width: 600px;
-      text-align: center;
+    input, button {
+      padding: 10px;
+      margin: 0.5rem;
+      border-radius: 5px;
+      border: none;
     }
 
     input {
-      width: 100%;
-      padding: 15px;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      margin-bottom: 20px;
+      width: 300px;
     }
 
     button {
-      padding: 15px 30px;
-      background-color: #3b82f6;
+      background-color: #1db954;
       color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
       cursor: pointer;
     }
 
-    button:hover {
-      background-color: #2563eb;
-    }
-
     #image-container {
-      margin-top: 30px;
+      margin-top: 2rem;
+      position: relative;
     }
 
-    img {
+    #spinner {
+      display: none;
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid #1db954;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin: 20px auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    #generated-image {
       max-width: 100%;
       border-radius: 10px;
-      margin-top: 20px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.4);
+      margin-top: 1rem;
+    }
+
+    #download-btn {
+      display: none;
+      margin-top: 1rem;
     }
   </style>
 </head>
 <body>
 
-  <header>AI Image Generator</header>
+  <h1>AI Image Generator</h1>
+  <input type="text" id="prompt" placeholder="Enter your image prompt..." />
+  <button onclick="generateImage()">Generate</button>
 
-  <main>
-    <input id="prompt" type="text" placeholder="Enter your image prompt..." />
-    <button onclick="generateImage()">Generate Image</button>
+  <div id="spinner"></div>
 
-    <div id="image-container"></div>
-  </main>
+  <div id="image-container">
+    <img id="generated-image" src="" alt="" />
+    <a id="download-btn" download="ai_image.png">Download Image</a>
+  </div>
 
   <script>
     async function generateImage() {
-      const prompt = document.getElementById("prompt").value;
-      const imageContainer = document.getElementById("image-container");
-      imageContainer.innerHTML = "Generating image...";
+      const prompt = document.getElementById('prompt').value;
+      const spinner = document.getElementById('spinner');
+      const image = document.getElementById('generated-image');
+      const downloadBtn = document.getElementById('download-btn');
 
-      try {
-        const response = await fetch('https://ai-image-generator-hwiv.onrender.com/generate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ prompt })
-        });
+      image.src = "";
+      spinner.style.display = "block";
+      downloadBtn.style.display = "none";
 
-        const data = await response.json();
-        if (data && data.imageUrl) {
-          imageContainer.innerHTML = `<img src="${data.imageUrl}" alt="Generated Image"/>`;
-        } else {
-          imageContainer.innerHTML = "Image generation failed.";
-        }
-      } catch (err) {
-        imageContainer.innerHTML = "Error: Could not connect to server.";
+      const response = await fetch("/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ prompt })
+      });
+
+      const data = await response.json();
+      spinner.style.display = "none";
+
+      if (data && data.image_url) {
+        image.src = data.image_url;
+        downloadBtn.href = data.image_url;
+        downloadBtn.style.display = "inline-block";
+      } else {
+        image.alt = "Failed to generate image";
       }
     }
   </script>
