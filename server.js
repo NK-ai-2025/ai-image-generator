@@ -1,33 +1,66 @@
-const express = require("express");
-const cors = require("cors");
-const axios = require("axios");
-require("dotenv").config();
+const express = require('express');
+const bodyParser = require('body-parser');
+const axios = require('axios');
+require('dotenv').config();
 
 const app = express();
-app.use(cors());
-app.use(express.json());
+const PORT = process.env.PORT || 3000;
+const REPLICATE_API_KEY = process.env.REPLICATE_API_KEY;
 
-const REPLICATE_API_URL = "https://api.replicate.com/v1/predictions";
+app.use(bodyParser.json());
+app.use(express.static('public')); // Serves index.html
 
-app.post("/generate", async (req, res) => {
+app.post('/generate', async (req, res) => {
   const { prompt } = req.body;
 
-  try {
-    const response = await axios.post(REPLICATE_API_URL, {
-      version: "a9758cbf0bf708f32404a9c88ccf8e5d53c9c6c1576c85e251e2f8db1d40845c", // SDXL
-      input: { prompt }
-    }, {
-      headers: {
-        "Authorization": `Token ${process.env.REPLICATE_API_KEY}`,
-        "Content-Type": "application/json"
-      }
-    });
+  if (!prompt || prompt.trim() === '') {
+    return res.status(400).json({ error: 'Prompt is required.' });
+  }
 
-    res.json(response.data);
+  try {
+    const response = await axios.post(
+      'https://api.replicate.com/v1/predictions',
+      {
+        version: "a9758cbf7c52f8c74a27b3c44f2fdf1e10ff5e8f38b5bb12c4aa6c3f96e444b8", // Replicate stable-diffusion
+        input: { prompt }
+      },
+      {
+        headers: {
+          'Authorization': `Token ${REPLICATE_API_KEY}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    const prediction = response.data;
+    const getUrl = async () => {
+      while (
+        prediction.status !== 'succeeded' &&
+        prediction.status !== 'failed'
+      ) {
+        const result = await axios.get(`https://api.replicate.com/v1/predictions/${prediction.id}`, {
+          headers: {
+            'Authorization': `Token ${REPLICATE_API_KEY}`
+          }
+        });
+        if (result.data.status === 'succeeded') {
+          return result.data.output[0];
+        } else if (result.data.status === 'failed') {
+          throw new Error('Image generation failed.');
+        }
+        await new Promise(r => setTimeout(r, 1000)); // Wait 1s before checking again
+      }
+    };
+
+    const imageUrl = await getUrl();
+    res.json({ image_url: imageUrl });
+
   } catch (error) {
-    res.status(500).json({ error: "Error generating image" });
+    console.error('Error:', error.message);
+    res.status(500).json({ error: 'Something went wrong while generating image.' });
   }
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+});
