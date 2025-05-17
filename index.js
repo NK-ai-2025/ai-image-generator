@@ -1,19 +1,29 @@
-// index.js
-const express = require('express');
-const path = require('path');
-require('dotenv').config();
+document.getElementById('login-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
 
-const app = express();
-const port = process.env.PORT || 3000;
+  const email = document.getElementById('login-email').value;
+  const password = document.getElementById('login-password').value;
 
-// Serve static files like index.html, CSS, JS, images
-app.use(express.static(path.join(__dirname)));
-
-// Home route - serve index.html
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
+  try {
+    const response = await axios.post('/login', { email, password });
+    if (response.status === 200) {
+      window.location.href = '/settings.html'; // Redirect to settings page after login
+    }
+  } catch (error) {
+    alert('Invalid credentials');
+  }
 });
 
-app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
+document.getElementById('register-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+
+  const email = document.getElementById('register-email').value;
+  const password = document.getElementById('register-password').value;
+
+  try {
+    const response = await axios.post('/register', { email, password });
+    alert('Registration successful');
+  } catch (error) {
+    alert('Error during registration');
+  }
 });
