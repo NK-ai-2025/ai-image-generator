@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generate Image</title>
+</head>
+<body>
+  <h1>Generate Your Image</h1>
+  
+  <label for="prompt">Enter prompt: </label>
+  <input type="text" id="prompt" placeholder="Enter image description">
+  
+  <label for="resolution">Select resolution: </label>
+  <select id="resolution">
+    <option value="1024x1024">1024x1024</option>
+    <option value="1920x1080">1920x1080</option>
+    <option value="1080x1920">1080x1920</option>
+  </select>
+  
+  <button onclick="generateImage()">Generate</button>
+  
+  <h2>Generated Image:</h2>
+  <img id="generated-image" src="" alt="Generated Image" style="max-width: 100%; height: auto;">
+  
+  <script>
+    async function generateImage() {
+      const prompt = document.getElementById('prompt').value;
+      const resolution = document.getElementById('resolution').value;
+      
+      if (!prompt) {
+        alert('Please enter a prompt.');
+        return;
+      }
+
+      try {
+        const response = await fetch('/generate-image', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ prompt, resolution })
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+          document.getElementById('generated-image').src = result.imageUrl;
+        } else {
+          alert('Error generating image: ' + result.message);
+        }
+      } catch (error) {
+        alert('Error: ' + error.message);
+      }
+    }
+  </script>
+</body>
+</html>
