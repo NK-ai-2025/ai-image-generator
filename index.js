@@ -1,29 +1,17 @@
-document.getElementById('login-form').addEventListener('submit', async function(e) {
-  e.preventDefault();
+const express = require('express');
+const path = require('path');
 
-  const email = document.getElementById('login-email').value;
-  const password = document.getElementById('login-password').value;
+const app = express();
+const PORT = process.env.PORT || 3000;
 
-  try {
-    const response = await axios.post('/login', { email, password });
-    if (response.status === 200) {
-      window.location.href = '/settings.html'; // Redirect to settings page after login
-    }
-  } catch (error) {
-    alert('Invalid credentials');
-  }
+// Serve static files from 'public' directory
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Default route
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-document.getElementById('register-form').addEventListener('submit', async function(e) {
-  e.preventDefault();
-
-  const email = document.getElementById('register-email').value;
-  const password = document.getElementById('register-password').value;
-
-  try {
-    const response = await axios.post('/register', { email, password });
-    alert('Registration successful');
-  } catch (error) {
-    alert('Error during registration');
-  }
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
