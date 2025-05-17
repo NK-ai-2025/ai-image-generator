@@ -3,28 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login/Register</title>
-  <link rel="stylesheet" href="styles.css">
+  <title>AI Image Generator</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-  <div id="login-register-container">
-    <h2>Login</h2>
-    <form id="login-form">
-      <input type="email" id="login-email" placeholder="Email" required />
-      <input type="password" id="login-password" placeholder="Password" required />
-      <button type="submit">Login</button>
+  <div class="container">
+    <h1>AI Image Generator</h1>
+    <form id="generate-form">
+      <input type="text" id="image-prompt" placeholder="Enter a prompt for image" required>
+      <button type="submit">Generate Image</button>
     </form>
-
-    <h2>Register</h2>
-    <form id="register-form">
-      <input type="email" id="register-email" placeholder="Email" required />
-      <input type="password" id="register-password" placeholder="Password" required />
-      <button type="submit">Register</button>
-    </form>
+    <div id="output">
+      <p id="loading-message" style="display:none;">Generating image...</p>
+      <img id="generated-image" src="" alt="Generated Image" style="display:none;">
+    </div>
   </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-  <script src="index.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
