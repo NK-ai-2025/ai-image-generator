@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings</title>
+</head>
+<body>
+  <h1>User Settings</h1>
+
+  <label for="resolution">Select default resolution: </label>
+  <select id="resolution">
+    <option value="1024x1024">1024x1024</option>
+    <option value="1920x1080">1920x1080</option>
+    <option value="1080x1920">1080x1920</option>
+  </select>
+  
+  <label for="location">Enter location (optional): </label>
+  <input type="text" id="location" placeholder="Enter location">
+  
+  <button onclick="saveSettings()">Save Settings</button>
+
+  <script>
+    async function saveSettings() {
+      const resolution = document.getElementById('resolution').value;
+      const location = document.getElementById('location').value;
+
+      const settings = { resolution, location };
+
+      try {
+        const response = await fetch('/save-settings', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(settings)
+        });
+        
+        const result = await response.json();
+
+        if (response.ok) {
+          alert('Settings saved successfully!');
+        } else {
+          alert('Error saving settings: ' + result.message);
+        }
+      } catch (error) {
+        alert('Error: ' + error.message);
+      }
+    }
+  </script>
+</body>
+</html>
